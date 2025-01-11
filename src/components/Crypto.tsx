@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import TradingViewWidget from "./TradingViewWidget";
 import btcImg from "../assets/btc.png";
@@ -17,8 +18,22 @@ const cryptoOptions = [
 ];
 
 function Crypto(): JSX.Element {
-  const [selectedCrypto, setSelectedCrypto] = useState(cryptoOptions[0]);
+  const { token } = useParams<{ token?: string }>();
+  const navigate = useNavigate();
+
+  const [selectedCrypto, setSelectedCrypto] = useState(
+    cryptoOptions.find((c) => c.id === token) || cryptoOptions[0]
+  );
   const [cryptoData, setCryptoData] = useState<CryptoData | null>(null);
+
+  useEffect(() => {
+    const cryptoFromUrl = cryptoOptions.find((c) => c.id === token);
+    if (cryptoFromUrl) {
+      setSelectedCrypto(cryptoFromUrl);
+    } else {
+      navigate("/bitcoin");
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,17 +52,16 @@ function Crypto(): JSX.Element {
     return () => clearInterval(interval);
   }, [selectedCrypto]);
 
+  const handleCryptoChange = (cryptoId: string) => {
+    navigate(`/${cryptoId}`);
+  };
+
   return (
     <div className="bg-white h-max rounded-lg my-5 p-6">
       <select
         className="mb-4 p-2 border rounded"
         value={selectedCrypto.id}
-        onChange={(e) =>
-          setSelectedCrypto(
-            cryptoOptions.find((c) => c.id === e.target.value) ||
-              cryptoOptions[0]
-          )
-        }
+        onChange={(e) => handleCryptoChange(e.target.value)}
       >
         {cryptoOptions.map((option) => (
           <option key={option.id} value={option.id}>
@@ -95,7 +109,7 @@ function Crypto(): JSX.Element {
         {/* Rest of your time period buttons... */}
       </div>
       <div className="lg:h-[420px] h-[300px]">
-        <TradingViewWidget />
+        <TradingViewWidget symbol={`${selectedCrypto.symbol}USD`} />
       </div>
     </div>
   );

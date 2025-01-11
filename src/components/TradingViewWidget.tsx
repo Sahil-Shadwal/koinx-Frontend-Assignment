@@ -1,45 +1,54 @@
-import { useEffect, useRef, memo } from 'react';
+import { useEffect, useRef, memo } from "react";
 
-function TradingViewWidget() {
+function TradingViewWidget({ symbol = "BTCUSD" }: { symbol?: string }) {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Clean up existing content
+    if (container.current) {
+      container.current.innerHTML = "";
+    }
+
     if (!container.current) return;
 
     const script = document.createElement("script");
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    script.src =
+      "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     script.type = "text/javascript";
     script.async = true;
 
-    const scriptContent = JSON.stringify({
-      "autosize": true,
-      "symbol": "CRYPTO:BTCUSD",
-      "timezone": "Etc/UTC",
-      "theme": "light",
-      "style": "2",
-      "locale": "en",
-      "enable_publishing": false,
-      "hide_top_toolbar": true,
-      "hide_legend": true,
-      "range": "5D",
-      "save_image": false,
-      "calendar": false,
-      "hide_volume": true,
-      "support_host": "https://www.tradingview.com"
-    });
+    const scriptContent = {
+      autosize: true,
+      symbol: symbol,
+      interval: "D",
+      timezone: "Etc/UTC",
+      theme: "light",
+      style: "1",
+      locale: "en",
+      enable_publishing: false,
+      allow_symbol_change: true,
+      hide_top_toolbar: true,
+      save_image: false,
+      container_id: "tradingview_widget",
+    };
 
-    script.innerHTML = scriptContent;
+    script.innerHTML = JSON.stringify(scriptContent);
     container.current.appendChild(script);
 
+    // Cleanup function
     return () => {
-      if (container.current && script.parentNode) {
-        container.current.removeChild(script);
+      if (container.current) {
+        container.current.innerHTML = "";
       }
     };
-  }, []);
+  }, [symbol]); // Re-run effect when symbol changes
 
   return (
-    <div className="tradingview-widget-container" ref={container} style={{ height: "100%", width: "100%" }}></div>
+    <div
+      id="tradingview_widget"
+      ref={container}
+      style={{ height: "100%", width: "100%" }}
+    />
   );
 }
 
