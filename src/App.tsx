@@ -1,13 +1,13 @@
-import Navbar from "./components/Navbar"
-import CoinPage from "./pages/CoinPage"
+import Navbar from "./components/Navbar";
+import CoinPage from "./pages/CoinPage";
 
 function App() {
   return (
     <div>
-       <Navbar/>
-       <CoinPage/>
+      <Navbar />
+      <CoinPage />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
